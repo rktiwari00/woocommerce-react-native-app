@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storeConfig } from '../config/store';
 
 const AuthContext = createContext();
 
@@ -62,23 +63,40 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      // Simulate API call - replace with actual WooCommerce customer API
-      const response = await fetch('YOUR_WOOCOMMERCE_URL/wp-json/wc/v3/customers', {
+      // Get all customers and find the one with matching email
+      const response = await fetch(`${storeConfig.woocommerce.baseUrl}/wp-json/wc/v3/customers?email=${email}`, {
         method: 'GET',
         headers: {
-          'Authorization': 'Basic ' + btoa('YOUR_CONSUMER_KEY:YOUR_CONSUMER_SECRET'),
+          'Authorization': 'Basic ' + btoa(`${storeConfig.woocommerce.consumerKey}:${storeConfig.woocommerce.consumerSecret}`),
           'Content-Type': 'application/json',
         },
       });
 
-      // For demo purposes, create a mock user
+      if (!response.ok) {
+        throw new Error('Network error');
+      }
+
+      const customers = await response.json();
+      
+      if (customers.length === 0) {
+        return { success: false, error: 'No account found with this email address.' };
+      }
+
+      const customer = customers[0];
+      
+      // Note: WooCommerce doesn't support password verification through REST API
+      // For production, you should implement JWT authentication or use WooCommerce authentication plugins
       const user = {
-        id: Date.now(),
-        email,
-        first_name: email.split('@')[0],
-        last_name: '',
-        avatar_url: 'https://via.placeholder.com/100',
-        phone: '',
+        id: customer.id,
+        email: customer.email,
+        first_name: customer.first_name,
+        last_name: customer.last_name,
+        avatar_url: customer.avatar_url || 'https://via.placeholder.com/100',
+        phone: customer.billing?.phone || '',
+        username: customer.username,
+        date_created: customer.date_created,
+        billing: customer.billing,
+        shipping: customer.shipping,
       };
 
       await AsyncStorage.setItem('user', JSON.stringify(user));
@@ -86,17 +104,17 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error: 'Login failed. Please try again.' };
+      return { success: false, error: 'Login failed. Please check your internet connection and try again.' };
     }
   };
 
   const signup = async (userData) => {
     try {
-      // Simulate API call - replace with actual WooCommerce customer creation API
-      const response = await fetch('YOUR_WOOCOMMERCE_URL/wp-json/wc/v3/customers', {
+      // Create customer using WooCommerce API
+      const response = await fetch(`${storeConfig.woocommerce.baseUrl}/wp-json/wc/v3/customers`, {
         method: 'POST',
         headers: {
-          'Authorization': 'Basic ' + btoa('YOUR_CONSUMER_KEY:YOUR_CONSUMER_SECRET'),
+          'Authorization': 'Basic ' + btoa(`${storeConfig.woocommerce.consumerKey}:${storeConfig.woocommerce.consumerSecret}`),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -105,17 +123,37 @@ export function AuthProvider({ children }) {
           last_name: userData.lastName,
           username: userData.email,
           password: userData.password,
+          billing: {
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            email: userData.email,
+            phone: userData.phone || '',
+          },
+          shipping: {
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+          },
         }),
       });
 
-      // For demo purposes, create a mock user
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Signup failed');
+      }
+
+      const customer = await response.json();
+      
       const user = {
-        id: Date.now(),
-        email: userData.email,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        avatar_url: 'https://via.placeholder.com/100',
-        phone: userData.phone || '',
+        id: customer.id,
+        email: customer.email,
+        first_name: customer.first_name,
+        last_name: customer.last_name,
+        avatar_url: customer.avatar_url || 'https://via.placeholder.com/100',
+        phone: customer.billing?.phone || '',
+        username: customer.username,
+        date_created: customer.date_created,
+        billing: customer.billing,
+        shipping: customer.shipping,
       };
 
       await AsyncStorage.setItem('user', JSON.stringify(user));
@@ -123,7 +161,17 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (error) {
       console.error('Signup error:', error);
-      return { success: false, error: 'Signup failed. Please try again.' };
+      
+      // Handle specific WooCommerce errors
+      if (error.message.includes('email_exists')) {
+        return { success: false, error: 'An account with this email already exists.' };
+      } else if (error.message.includes('username_exists')) {
+        return { success: false, error: 'This username is already taken.' };
+      } else if (error.message.includes('invalid_email')) {
+        return { success: false, error: 'Please enter a valid email address.' };
+      }
+      
+      return { success: false, error: error.message || 'Signup failed. Please try again.' };
     }
   };
 
@@ -138,13 +186,39 @@ export function AuthProvider({ children }) {
 
   const updateUser = async (updates) => {
     try {
-      const updatedUser = { ...state.user, ...updates };
+      if (!state.user?.id) {
+        return { success: false, error: 'No user logged in.' };
+      }
+
+      // Update customer using WooCommerce API
+      const response = await fetch(`${storeConfig.woocommerce.baseUrl}/wp-json/wc/v3/customers/${state.user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Basic ' + btoa(`${storeConfig.woocommerce.consumerKey}:${storeConfig.woocommerce.consumerSecret}`),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Update failed');
+      }
+
+      const customer = await response.json();
+      
+      const updatedUser = {
+        ...state.user,
+        ...customer,
+        avatar_url: customer.avatar_url || state.user.avatar_url,
+      };
+
       await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
-      dispatch({ type: 'UPDATE_USER', payload: updates });
+      dispatch({ type: 'UPDATE_USER', payload: customer });
       return { success: true };
     } catch (error) {
       console.error('Update user error:', error);
-      return { success: false, error: 'Failed to update profile.' };
+      return { success: false, error: error.message || 'Failed to update profile.' };
     }
   };
 

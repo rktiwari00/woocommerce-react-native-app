@@ -203,6 +203,19 @@ export const customersAPI = {
     }
   },
 
+  // Get customer by email
+  getCustomerByEmail: async (email) => {
+    try {
+      const response = await woocommerceAPI.get('/customers', {
+        params: { email }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching customer by email:', error);
+      throw error;
+    }
+  },
+
   // Update customer
   updateCustomer: async (id, customerData) => {
     try {
@@ -210,6 +223,24 @@ export const customersAPI = {
       return response.data;
     } catch (error) {
       console.error('Error updating customer:', error);
+      throw error;
+    }
+  },
+
+  // Authenticate customer (login)
+  authenticateCustomer: async (email, password) => {
+    try {
+      // Note: WooCommerce REST API doesn't support password verification
+      // This is a workaround - in production you should use JWT tokens
+      const customers = await customersAPI.getCustomerByEmail(email);
+
+      if (customers.length === 0) {
+        throw new Error('Customer not found');
+      }
+
+      return customers[0];
+    } catch (error) {
+      console.error('Error authenticating customer:', error);
       throw error;
     }
   },
