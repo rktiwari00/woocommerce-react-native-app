@@ -6,6 +6,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { CartProvider } from '../contexts/CartContext';
+import { AuthProvider } from '../contexts/AuthContext';
+import { NotificationProvider } from '../contexts/NotificationContext';
 import { theme as appTheme } from '../config/theme';
 import { storeConfig } from '../config/store';
 
@@ -45,48 +47,55 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider theme={paperTheme}>
-        <CartProvider>
-          <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: appTheme.primary,
-            },
-            headerTintColor: appTheme.textLight,
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen
-            name="index"
-            options={{
-              title: storeConfig.storeName,
-            }}
-          />
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="product/[id]"
-            options={{
-              title: 'Product Details',
-              headerShown: true,
-            }}
-          />
-          <Stack.Screen
-            name="checkout"
-            options={{
-              title: 'Checkout',
-              headerShown: true,
-            }}
-          />
-          </Stack>
-          <StatusBar style="light" />
-        </CartProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <CartProvider>
+              <Stack
+                screenOptions={{
+                  headerStyle: {
+                    backgroundColor: appTheme.primary,
+                  },
+                  headerTintColor: appTheme.textLight,
+                  headerTitleStyle: {
+                    fontWeight: 'bold',
+                  },
+                  headerShown: false,
+                }}
+              >
+                <Stack.Screen
+                  name="index"
+                  options={{
+                    title: storeConfig.storeName,
+                  }}
+                />
+                <Stack.Screen
+                  name="(tabs)"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="product/[id]"
+                  options={{
+                    title: 'Product Details',
+                    headerShown: true,
+                  }}
+                />
+                <Stack.Screen
+                  name="checkout"
+                  options={{
+                    title: 'Checkout',
+                    headerShown: true,
+                  }}
+                />
+                <Stack.Screen name="login" options={{ title: 'Sign In' }} />
+                <Stack.Screen name="signup" options={{ title: 'Sign Up' }} />
+                <Stack.Screen name="notifications" options={{ headerShown: false }} />
+              </Stack>
+              <StatusBar style="light" />
+            </CartProvider>
+          </NotificationProvider>
+        </AuthProvider>
       </PaperProvider>
     </GestureHandlerRootView>
   );

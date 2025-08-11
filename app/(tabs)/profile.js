@@ -8,17 +8,26 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { Card, List, Switch, Divider, Button, Avatar } from 'react-native-paper';
+import { Card, List, Switch, Divider, Button, Avatar, Title, Paragraph } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNotification } from '../../contexts/NotificationContext';
 import { theme } from '../../config/theme';
 import { storeConfig } from '../../config/store';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { clearCart } = useCart();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const { user, isAuthenticated, logout } = useAuth();
+  const {
+    notificationSettings,
+    updateNotificationSettings,
+    getUnreadCount,
+    sendOrderNotification,
+    sendPromotionalNotification
+  } = useNotification();
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
 
   const handleContactPress = (type) => {
@@ -72,7 +81,7 @@ export default function ProfileScreen() {
           text: 'Logout',
           onPress: () => {
             clearCart();
-            // Add logout logic here
+            logout();
             Alert.alert('Success', 'You have been logged out');
           },
           style: 'destructive',
@@ -104,41 +113,6 @@ export default function ProfileScreen() {
     },
   ];
 
-  const settingsItems = [
-    {
-      title: 'Push Notifications',
-      icon: 'notifications-outline',
-      right: () => (
-        <Switch
-          value={notificationsEnabled}
-          onValueChange={setNotificationsEnabled}
-          color={theme.primary}
-        />
-      ),
-    },
-    {
-      title: 'Dark Mode',
-      icon: 'moon-outline',
-      right: () => (
-        <Switch
-          value={darkModeEnabled}
-          onValueChange={setDarkModeEnabled}
-          color={theme.primary}
-        />
-      ),
-    },
-    {
-      title: 'Language',
-      icon: 'language-outline',
-      onPress: () => router.push('/language'),
-    },
-    {
-      title: 'Currency',
-      icon: 'cash-outline',
-      onPress: () => router.push('/currency'),
-    },
-  ];
-
   const supportItems = [
     {
       title: 'Help Center',
@@ -162,29 +136,115 @@ export default function ProfileScreen() {
     },
   ];
 
+  const testNotifications = () => {
+    sendOrderNotification();
+    sendPromotionalNotification();
+  };
+
   return (
     <ScrollView style={styles.container}>
-      {/* Profile Header */}
-      <Card style={styles.profileCard}>
-        <Card.Content style={styles.profileContent}>
-          <Avatar.Text
-            size={80}
-            label="JD"
-            style={styles.avatar}
-            color={theme.textLight}
+      {isAuthenticated ? (
+        <Card style={styles.profileCard}>
+          <Card.Content style={styles.profileContent}>
+            <Avatar.Icon
+              size={80}
+              icon="account"
+              style={styles.avatar}
+            />
+            <Title style={styles.profileName}>
+              {user?.first_name} {user?.last_name}
+            </Title>
+            <Paragraph style={styles.profileEmail}>{user?.email}</Paragraph>
+          </Card.Content>
+        </Card>
+      ) : (
+        <Card style={styles.profileCard}>
+          <Card.Content style={styles.profileContent}>
+            <Avatar.Icon
+              size={80}
+              icon="account-plus"
+              style={styles.avatar}
+            />
+            <Title style={styles.profileName}>Welcome Guest</Title>
+            <Paragraph style={styles.profileEmail}>Sign in to access your account</Paragraph>
+            <View style={styles.authButtons}>
+              <Button
+                mode="contained"
+                onPress={() => router.push('/login')}
+                style={styles.authButton}
+              >
+                Sign In
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => router.push('/signup')}
+                style={styles.authButton}
+              >
+                Sign Up
+              </Button>
+            </View>
+          </Card.Content>
+        </Card>
+      )}
+
+      <Card style={styles.card}>
+        <List.Section>
+          <List.Subheader>Notifications</List.Subheader>
+          <List.Item
+            title="View Notifications"
+            description={`${getUnreadCount()} unread notifications`}
+            left={(props) => <List.Icon {...props} icon="bell" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/notifications')}
           />
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>John Doe</Text>
-            <Text style={styles.profileEmail}>john.doe@example.com</Text>
-            <Button
-              mode="outlined"
-              onPress={() => router.push('/edit-profile')}
-              style={styles.editProfileButton}
-            >
-              Edit Profile
-            </Button>
-          </View>
-        </Card.Content>
+          <Divider />
+          <List.Item
+            title="Order Updates"
+            description="Get notified about order status changes"
+            left={(props) => <List.Icon {...props} icon="receipt" />}
+            right={() => (
+              <Switch
+                value={notificationSettings.orderUpdates}
+                onValueChange={(value) =>
+                  updateNotificationSettings({ orderUpdates: value })
+                }
+              />
+            )}
+          />
+          <List.Item
+            title="Promotions"
+            description="Receive promotional offers and deals"
+            left={(props) => <List.Icon {...props} icon="percent" />}
+            right={() => (
+              <Switch
+                value={notificationSettings.promotions}
+                onValueChange={(value) =>
+                  updateNotificationSettings({ promotions: value })
+                }
+              />
+            )}
+          />
+          <List.Item
+            title="New Products"
+            description="Be first to know about new arrivals"
+            left={(props) => <List.Icon {...props} icon="new-box" />}
+            right={() => (
+              <Switch
+                value={notificationSettings.newProducts}
+                onValueChange={(value) =>
+                  updateNotificationSettings({ newProducts: value })
+                }
+              />
+            )}
+          />
+          <Divider />
+          <List.Item
+            title="Test Notifications"
+            description="Send sample notifications"
+            left={(props) => <List.Icon {...props} icon="test-tube" />}
+            onPress={testNotifications}
+          />
+        </List.Section>
       </Card>
 
       {/* Contact Information */}
@@ -268,27 +328,6 @@ export default function ProfileScreen() {
         </Card.Content>
       </Card>
 
-      {/* Settings */}
-      <Card style={styles.settingsCard}>
-        <Card.Content>
-          <Text style={styles.sectionTitle}>Settings</Text>
-          {settingsItems.map((item, index) => (
-            <React.Fragment key={item.title}>
-              <List.Item
-                title={item.title}
-                left={(props) => (
-                  <Ionicons name={item.icon} size={24} color={props.color || theme.text} />
-                )}
-                right={item.right}
-                onPress={item.onPress}
-                style={styles.listItem}
-              />
-              {index < settingsItems.length - 1 && <Divider />}
-            </React.Fragment>
-          ))}
-        </Card.Content>
-      </Card>
-
       {/* Support */}
       <Card style={styles.supportCard}>
         <Card.Content>
@@ -312,17 +351,51 @@ export default function ProfileScreen() {
         </Card.Content>
       </Card>
 
-      {/* Logout Button */}
-      <View style={styles.logoutContainer}>
-        <Button
-          mode="outlined"
-          onPress={handleLogout}
-          style={styles.logoutButton}
-          textColor={theme.error}
-        >
-          Logout
-        </Button>
-      </View>
+      {/* Settings */}
+      <Card style={styles.card}>
+        <List.Section>
+          <List.Subheader>Settings</List.Subheader>
+          <List.Item
+            title="Dark Mode"
+            description="Toggle dark theme"
+            left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
+            right={() => (
+              <Switch
+                value={darkModeEnabled}
+                onValueChange={setDarkModeEnabled}
+              />
+            )}
+          />
+          <Divider />
+          <List.Item
+            title="Clear Cart"
+            description="Remove all items from cart"
+            left={(props) => <List.Icon {...props} icon="cart-remove" />}
+            onPress={() => {
+              Alert.alert(
+                'Clear Cart',
+                'Are you sure you want to remove all items from your cart?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Clear', onPress: clearCart, style: 'destructive' },
+                ]
+              );
+            }}
+          />
+          {isAuthenticated && (
+            <>
+              <Divider />
+              <List.Item
+                title="Sign Out"
+                description="Sign out of your account"
+                left={(props) => <List.Icon {...props} icon="logout" />}
+                onPress={handleLogout}
+                titleStyle={{ color: theme.error }}
+              />
+            </>
+          )}
+        </List.Section>
+      </Card>
 
       {/* App Version */}
       <View style={styles.versionContainer}>
@@ -359,9 +432,18 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   profileEmail: {
-    fontSize: theme.typography.body.fontSize,
     color: theme.textSecondary,
-    marginBottom: theme.spacing.md,
+    marginBottom: 16,
+  },
+  authButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+    width: '100%',
+  },
+  authButton: {
+    flex: 1,
+    marginHorizontal: 8,
   },
   editProfileButton: {
     borderRadius: theme.borderRadius.lg,
@@ -430,5 +512,9 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: theme.typography.small.fontSize,
     color: theme.textSecondary,
+  },
+  card: {
+    margin: theme.spacing.md,
+    borderRadius: theme.borderRadius.lg,
   },
 });
