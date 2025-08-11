@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "WooCommerce Shopping App",
+    "slug": "woocommerce-shopping-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.woocommerceshoppingapp"
+    },
+    "android": {
+      "package": "com.yourcompany.woocommerceshoppingapp"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store"
+    ],
+    "scheme": "woocommerce-shopping-app",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
