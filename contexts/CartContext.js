@@ -42,6 +42,7 @@ const cartReducer = (state, action) => {
       };
 
     case 'CLEAR_CART':
+      console.log('CLEAR_CART action dispatched');
       return {
         ...state,
         items: [],
@@ -126,6 +127,10 @@ export const CartProvider = ({ children }) => {
   // Clear cart
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
+    // Force save empty cart to AsyncStorage
+    AsyncStorage.setItem('cart', JSON.stringify([])).catch(error => {
+      console.error('Error clearing cart from storage:', error);
+    });
   };
 
   // Calculate cart totals

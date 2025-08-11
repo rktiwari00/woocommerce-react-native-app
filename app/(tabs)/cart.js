@@ -57,7 +57,15 @@ export default function CartScreen() {
       'Are you sure you want to remove all items from your cart?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear All', onPress: () => clearCart(), style: 'destructive' },
+        { 
+          text: 'Clear All', 
+          onPress: () => {
+            console.log('Clearing cart, current items:', items.length);
+            clearCart();
+            console.log('Cart cleared');
+          }, 
+          style: 'destructive' 
+        },
       ],
       { cancelable: true }
     );
