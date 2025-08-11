@@ -92,10 +92,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row', flexWrap: 'wrap', padding: theme.spacing.md, justifyContent: 'space-between',
   },
   cardWrap: { width: (width - theme.spacing.md * 3) / 2, marginBottom: theme.spacing.md },
-  card: { borderRadius: theme.borderRadius.lg },
+  card: { borderRadius: theme.borderRadius.lg, backgroundColor: theme.card, elevation: 2 },
   image: { height: 150, borderTopLeftRadius: theme.borderRadius.lg, borderTopRightRadius: theme.borderRadius.lg },
   name: { marginTop: theme.spacing.xs },
   price: { color: theme.primary, fontWeight: 'bold', marginTop: theme.spacing.xs },
 });
-
-

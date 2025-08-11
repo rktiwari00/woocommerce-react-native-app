@@ -54,11 +54,12 @@ export default function CartScreen() {
   const handleClearCart = () => {
     Alert.alert(
       'Clear Cart',
-      'Are you sure you want to clear your entire cart?',
+      'Are you sure you want to remove all items from your cart?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', onPress: clearCart, style: 'destructive' },
-      ]
+        { text: 'Clear All', onPress: () => clearCart(), style: 'destructive' },
+      ],
+      { cancelable: true }
     );
   };
 
