@@ -90,9 +90,35 @@ export default function RootLayout() {
                 />
                 <Stack.Screen name="login" options={{ title: 'Sign In' }} />
                 <Stack.Screen name="signup" options={{ title: 'Sign Up' }} />
-                <Stack.Screen name="notifications" options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="notifications"
+                  options={{
+                    title: 'Notifications',
+                    headerShown: true,
+                  }}
+                />
+                <Stack.Screen
+                  name="orders"
+                  options={{
+                    title: 'My Orders',
+                    headerShown: true,
+                  }}
+                />
+                <Stack.Screen
+                  name="wishlist"
+                  options={{
+                    title: 'Wishlist',
+                    headerShown: true,
+                  }}
+                />
+                <Stack.Screen
+                  name="addresses"
+                  options={{
+                    title: 'My Addresses',
+                    headerShown: true,
+                  }}
+                />
               </Stack>
-              <StatusBar style="light" />
             </CartProvider>
           </NotificationProvider>
         </AuthProvider>

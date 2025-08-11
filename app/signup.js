@@ -85,6 +85,21 @@ export default function SignupScreen() {
             },
           ]
         );
+      } else if (result.shouldRedirectToLogin) {
+        Alert.alert(
+          'Account Already Exists',
+          'An account with this email already exists. Please sign in instead.',
+          [
+            {
+              text: 'Sign In',
+              onPress: () => router.replace('/login'),
+            },
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+          ]
+        );
       } else {
         Alert.alert('Signup Failed', result.error);
       }

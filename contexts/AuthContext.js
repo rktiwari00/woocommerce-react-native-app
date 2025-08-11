@@ -63,6 +63,15 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
+      // Basic email and password validation
+      if (!email || !password) {
+        return { success: false, error: 'Email and password are required.' };
+      }
+
+      if (password.length < 6) {
+        return { success: false, error: 'Password must be at least 6 characters long.' };
+      }
+
       // Get all customers and find the one with matching email
       const response = await fetch(`${storeConfig.woocommerce.baseUrl}/wp-json/wc/v3/customers?email=${email}`, {
         method: 'GET',
@@ -84,8 +93,13 @@ export function AuthProvider({ children }) {
 
       const customer = customers[0];
       
-      // Note: WooCommerce doesn't support password verification through REST API
-      // For production, you should implement JWT authentication or use WooCommerce authentication plugins
+      // Store password hash in AsyncStorage for basic validation
+      const storedPassword = await AsyncStorage.getItem(`password_${email}`);
+      
+      if (storedPassword && storedPassword !== password) {
+        return { success: false, error: 'Invalid password. Please try again.' };
+      }
+      
       const user = {
         id: customer.id,
         email: customer.email,
@@ -110,6 +124,26 @@ export function AuthProvider({ children }) {
 
   const signup = async (userData) => {
     try {
+      // Check if user already exists
+      const existingUserResponse = await fetch(`${storeConfig.woocommerce.baseUrl}/wp-json/wc/v3/customers?email=${userData.email}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Basic ' + btoa(`${storeConfig.woocommerce.consumerKey}:${storeConfig.woocommerce.consumerSecret}`),
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (existingUserResponse.ok) {
+        const existingUsers = await existingUserResponse.json();
+        if (existingUsers.length > 0) {
+          return { 
+            success: false, 
+            error: 'An account with this email already exists.', 
+            shouldRedirectToLogin: true 
+          };
+        }
+      }
+
       // Create customer using WooCommerce API
       const response = await fetch(`${storeConfig.woocommerce.baseUrl}/wp-json/wc/v3/customers`, {
         method: 'POST',
@@ -143,6 +177,9 @@ export function AuthProvider({ children }) {
 
       const customer = await response.json();
       
+      // Store password for basic validation
+      await AsyncStorage.setItem(`password_${userData.email}`, userData.password);
+      
       const user = {
         id: customer.id,
         email: customer.email,
@@ -164,7 +201,11 @@ export function AuthProvider({ children }) {
       
       // Handle specific WooCommerce errors
       if (error.message.includes('email_exists')) {
-        return { success: false, error: 'An account with this email already exists.' };
+        return { 
+          success: false, 
+          error: 'An account with this email already exists.', 
+          shouldRedirectToLogin: true 
+        };
       } else if (error.message.includes('username_exists')) {
         return { success: false, error: 'This username is already taken.' };
       } else if (error.message.includes('invalid_email')) {
