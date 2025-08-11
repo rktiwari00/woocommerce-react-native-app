@@ -6,3 +6,19 @@ channel = "stable-25_05"
 
 [deployment]
 run = ["sh", "-c", "npm run start"]
+
+[workflows]
+runButton = "Start Expo Dev Server"
+
+[[workflows.workflow]]
+name = "Start Expo Dev Server"
+author = 5259296
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
+
+[[ports]]
+localPort = 8081
+externalPort = 80
