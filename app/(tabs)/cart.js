@@ -8,7 +8,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { Card, Button, Divider, IconButton } from 'react-native-paper';
+import { Card, Button, Divider, IconButton, Surface } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCart } from '../../contexts/CartContext';
@@ -63,8 +63,8 @@ export default function CartScreen() {
   };
 
   const renderCartItem = (item) => (
-    <Card key={item.id} style={styles.cartItem}>
-      <Card.Content style={styles.cartItemContent}>
+    <Surface key={item.id} style={styles.cartItem} elevation={2}>
+      <View style={styles.cartItemContent}>
         <Image
           source={{ uri: item.image || 'https://via.placeholder.com/80x80' }}
           style={styles.itemImage}
@@ -110,8 +110,8 @@ export default function CartScreen() {
             onPress={() => handleRemoveItem(item.id)}
           />
         </View>
-      </Card.Content>
-    </Card>
+      </View>
+    </Surface>
   );
 
   if (items.length === 0) {
@@ -142,8 +142,8 @@ export default function CartScreen() {
         </View>
 
         {/* Order Summary */}
-        <Card style={styles.summaryCard}>
-          <Card.Content>
+        <Surface style={styles.summaryCard} elevation={3}>
+          <View style={styles.summaryContent}>
             <Text style={styles.summaryTitle}>Order Summary</Text>
             <Divider style={styles.divider} />
             
@@ -175,8 +175,8 @@ export default function CartScreen() {
                 {storeConfig.payment.currencySymbol}{getTotalWithShipping().toFixed(2)}
               </Text>
             </View>
-          </Card.Content>
-        </Card>
+          </View>
+        </Surface>
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
@@ -239,6 +239,8 @@ const styles = StyleSheet.create({
   cartItem: {
     marginBottom: theme.spacing.md,
     borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+    backgroundColor: theme.card,
   },
   cartItemContent: {
     flexDirection: 'row',
@@ -297,6 +299,10 @@ const styles = StyleSheet.create({
   summaryCard: {
     margin: theme.spacing.md,
     borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.card,
+  },
+  summaryContent: {
+    padding: theme.spacing.lg,
   },
   summaryTitle: {
     fontSize: theme.typography.h3.fontSize,

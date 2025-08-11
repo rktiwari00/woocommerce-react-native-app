@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Card, Button, Chip } from 'react-native-paper';
+import { Card, Button, Chip, FAB, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { productsAPI, categoriesAPI } from '../../services/woocommerce';
 import { useCart } from '../../contexts/CartContext';
@@ -87,13 +87,13 @@ export default function Index() {
 
   const renderCategoryCard = (category) => (
     <TouchableOpacity key={category.id} style={styles.categoryCard} onPress={() => handleCategoryPress(category)}>
-      <Card style={styles.categoryCardInner}>
+      <Surface style={styles.categoryCard} elevation={2}>
         <Card.Cover source={{ uri: category.image?.src || 'https://via.placeholder.com/150x150' }} style={styles.categoryImage} />
         <Card.Content style={styles.categoryContent}>
           <Text style={styles.categoryName} numberOfLines={2}>{category.name}</Text>
           <Text style={styles.categoryCount}>{category.count} products</Text>
         </Card.Content>
-      </Card>
+      </Surface>
     </TouchableOpacity>
   );
 
@@ -177,14 +177,15 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: theme.typography.h3.fontSize, fontWeight: 'bold', color: theme.text },
   seeAllText: { color: theme.primary, fontSize: theme.typography.body.fontSize },
   saleChip: { backgroundColor: theme.secondaryLight },
-  categoryCard: { marginLeft: theme.spacing.md, width: 120 },
+  categoryCard: { marginLeft: theme.spacing.md, width: 120, padding: 8, justifyContent: 'center', alignItems: 'center' },
   categoryCardInner: { borderRadius: theme.borderRadius.lg },
-  categoryImage: { height: 80, borderTopLeftRadius: theme.borderRadius.lg, borderTopRightRadius: theme.borderRadius.lg },
-  categoryContent: { padding: theme.spacing.sm },
+  categoryImage: { height: 80, width: 110, borderRadius: theme.borderRadius.md, marginBottom: theme.spacing.sm },
+  categoryContent: { padding: theme.spacing.sm, alignItems: 'center' },
   categoryName: { fontSize: theme.typography.caption.fontSize, fontWeight: '600', textAlign: 'center', marginBottom: theme.spacing.xs },
   categoryCount: { fontSize: theme.typography.small.fontSize, color: theme.textSecondary, textAlign: 'center' },
   productsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: theme.spacing.md, justifyContent: 'space-between' },
-  productCard: { width: (width - theme.spacing.md * 3) / 2, marginBottom: theme.spacing.md },
+  productCard: { width: (width - theme.spacing.md * 3) / 2, marginBottom: theme.spacing.md, borderRadius: theme.borderRadius.lg },
+  featuredProductCard: { width: (width - theme.spacing.md * 3) / 2, marginBottom: theme.spacing.md, borderRadius: theme.borderRadius.lg, padding: 10 },
   card: { borderRadius: theme.borderRadius.lg, elevation: 2 },
   productImage: { height: 150, borderTopLeftRadius: theme.borderRadius.lg, borderTopRightRadius: theme.borderRadius.lg },
   cardContent: { padding: theme.spacing.sm },
@@ -195,5 +196,3 @@ const styles = StyleSheet.create({
   addToCartButton: { borderRadius: theme.borderRadius.md },
   buttonLabel: { fontSize: theme.typography.caption.fontSize },
 });
-
-
