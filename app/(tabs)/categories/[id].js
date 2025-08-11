@@ -1,12 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { Card } from 'react-native-paper';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { productsAPI, categoriesAPI } from '../../../services/woocommerce';
-import { theme } from '../../../config/theme';
-import { storeConfig } from '../../../config/store';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import { Card } from "react-native-paper";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { productsAPI, categoriesAPI } from "../../../services/woocommerce";
+import { theme } from "../../../config/theme";
+import { storeConfig } from "../../../config/store";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export default function CategoryDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -29,7 +36,7 @@ export default function CategoryDetailScreen() {
       setCategory(cat);
       setProducts(prods);
     } catch (error) {
-      console.error('Error loading category:', error);
+      console.error("Error loading category:", error);
     } finally {
       setLoading(false);
     }
@@ -50,7 +57,7 @@ export default function CategoryDetailScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{category?.name || 'Category'}</Text>
+        <Text style={styles.title}>{category?.name || "Category"}</Text>
         {category?.description ? (
           <Text style={styles.subtitle}>{category.description}</Text>
         ) : null}
@@ -65,13 +72,28 @@ export default function CategoryDetailScreen() {
           >
             <Card style={styles.card}>
               <Card.Cover
-                source={{ uri: product.images?.[0]?.src || 'https://via.placeholder.com/200x200' }}
+                source={{
+                  uri:
+                    product.images?.[0]?.src ||
+                    "https://via.placeholder.com/200x200",
+                }}
                 style={styles.image}
               />
               <Card.Content>
-                <Text numberOfLines={2} style={styles.name}>{product.name}</Text>
+                <Text numberOfLines={2} style={styles.name}>
+                  {product.name}
+                </Text>
                 <Text style={styles.price}>
-                  {storeConfig.payment.currencySymbol}{product.sale_price || product.price}
+                  {storeConfig.payment.currencySymbol}
+                  {product.sale_price || product.price}
+                </Text>
+                <Text style={styles.offer}>
+                  
+                  {'10% Off on Diamonds'}
+                </Text>
+                <Text style={styles.offer}>
+                  
+                  {'20% Off on Making'}
                 </Text>
               </Card.Content>
             </Card>
@@ -84,16 +106,50 @@ export default function CategoryDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
   header: { padding: theme.spacing.lg, backgroundColor: theme.primary },
-  title: { fontSize: theme.typography.h2.fontSize, fontWeight: 'bold', color: theme.textLight },
+  title: {
+    fontSize: theme.typography.h2.fontSize,
+    fontWeight: "bold",
+    color: theme.textLight,
+  },
   subtitle: { marginTop: theme.spacing.xs, color: theme.textLight },
   grid: {
-    flexDirection: 'row', flexWrap: 'wrap', padding: theme.spacing.md, justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    padding: theme.spacing.md,
+    justifyContent: "space-between",
   },
-  cardWrap: { width: (width - theme.spacing.md * 3) / 2, marginBottom: theme.spacing.md },
-  card: { borderRadius: theme.borderRadius.lg, backgroundColor: theme.card, elevation: 2 },
-  image: { height: 150, borderTopLeftRadius: theme.borderRadius.lg, borderTopRightRadius: theme.borderRadius.lg },
-  name: { marginTop: theme.spacing.xs },
-  price: { color: theme.primary, fontWeight: 'bold', marginTop: theme.spacing.xs },
+  cardWrap: {
+    width: (width - theme.spacing.md * 3) / 2,
+    marginBottom: theme.spacing.md,
+  },
+  card: {
+    borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.card,
+    elevation: 2,
+  },
+  image: {
+    height: 150,
+    borderTopLeftRadius: theme.borderRadius.lg,
+    borderTopRightRadius: theme.borderRadius.lg,
+  },
+  name: {
+    marginTop: theme.spacing.xs,
+    fontWeight: 600,
+    fontSize: theme.typography.caption.fontSize,
+  },
+  price: {
+    color: theme.textLight,
+    fontWeight: "bold",
+    marginTop: theme.spacing.xs,
+    padding: theme.spacing.xs,
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: theme.primary,
+  },
+  offer: {
+    color: theme.primary,
+    marginTop: theme.spacing.xs,
+    fontSize: theme.typography.caption.fontSize,
+  },
 });

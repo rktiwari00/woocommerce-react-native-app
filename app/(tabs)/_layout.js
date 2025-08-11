@@ -5,6 +5,8 @@ import { theme } from '../../config/theme';
 import { storeConfig } from '../../config/store';
 import { useCart } from '../../contexts/CartContext';
 
+
+
 export default function TabLayout() {
   const { getCartCount } = useCart();
 
@@ -76,6 +78,7 @@ export default function TabLayout() {
             <Ionicons name="home" size={size} color={color} />
           ),
           headerTitle: storeConfig.storeName,
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -85,6 +88,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="grid" size={size} color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -117,7 +121,7 @@ export default function TabLayout() {
         name="categories/[id]"
         options={{
           href: null,
-          headerTitle: 'Category',
+          headerTitle:  "Balleza Blue" || storeConfig.storeName,
         }}
       />
     </Tabs>

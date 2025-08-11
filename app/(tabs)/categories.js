@@ -27,9 +27,18 @@ export default function CategoriesScreen() {
 
   const loadCategories = async () => {
     try {
+      
       setLoading(true);
       const data = await categoriesAPI.getCategories({ per_page: 50 });
-      setCategories(data);
+
+      // Filter out unwanted categories
+      const filtered = data.filter(
+        (cat) =>
+          cat.name.toLowerCase() !== 'see all' &&
+          cat.name.toLowerCase() !== 'featured product'
+      );
+
+      setCategories(filtered);
     } catch (error) {
       console.error('Error loading categories:', error);
     } finally {
@@ -90,19 +99,20 @@ export default function CategoriesScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <View style={styles.header}>
+      <View style={{ ...styles.header }}>
         <Text style={styles.title}>Categories</Text>
         <Text style={styles.subtitle}>
           Browse products by category
         </Text>
       </View>
-      
+
       <View style={styles.categoriesGrid}>
         {categories.map(renderCategoryCard)}
       </View>
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -123,6 +133,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: theme.textLight,
     marginBottom: theme.spacing.xs,
+    paddingTop: theme.spacing.md,
   },
   subtitle: {
     fontSize: theme.typography.body.fontSize,
@@ -152,13 +163,13 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
   },
   categoryName: {
-    fontSize: theme.typography.h4.fontSize,
+    fontSize: theme.typography.body.fontSize,
     fontWeight: '600',
     marginBottom: theme.spacing.xs,
     textAlign: 'center',
   },
   categoryCount: {
-    fontSize: theme.typography.caption.fontSize,
+    fontSize: theme.typography.small.fontSize,
     color: theme.textSecondary,
     textAlign: 'center',
     marginBottom: theme.spacing.xs,
